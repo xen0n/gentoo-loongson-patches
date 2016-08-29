@@ -1,0 +1,63 @@
+From f44a620161abfcf306dec89f2d66c0f5f195c951 Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Wed, 9 Dec 2015 14:07:12 +0800
+Subject: [PATCH 3/4] gcc-4.9.3: Implementing of the "<d>mtc1-to-xor"
+ optimization.
+
+    When a double/single 0.0 is needed in a FP_REG, the compiler generate "<d>mtc1 $0,$fx".
+    However, "<d>mtc1" on 464e-core is issued to memory unit and has 3~5 cycles latency.
+    So we use "xor $fx,$fx,$fx" to substitute the "<d>mtc1", the latency is reduced to 2.
+
+    mips/
+    mips.md: Added mov[ds]f_zero template.
+
+Change-Id: Ia278ca388c8a1c359d9def6310d6607cd151b854
+---
+ gcc/config/mips/mips.md | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index 04cc3b3..fb114a3 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -4938,6 +4938,18 @@
+     }
+ })
+ 
++;; 32-bit floating point moves zero
++;; In loongson3a we use xor "$f0,$f0,$f0" to substitute "mtc1 $0,$f0".
++
++(define_insn "movsf_zero"
++  [(set (match_operand:SF 0 "register_operand" "=f")
++        (match_operand:SF 1 "const_0_operand" ""))]
++  "TARGET_LOONGSON_3A"
++  "xor %0,%0,%0"
++  [(set_attr "type" "logical")
++   (set_attr "mode" "SF")])
++
++
+ ;; 32-bit floating point moves
+ 
+ (define_expand "movsf"
+@@ -4986,6 +4998,18 @@
+   [(set_attr "move_type" "move,move,move,load,store")
+    (set_attr "mode" "SF")])
+ 
++
++;; 64-bit floating point moves zero
++;; In loongson3a we use "xor $f0,$f0,$f0" to substitute "dmtc1 $0,$f0".
++
++(define_insn "movdf_zero"
++  [(set (match_operand:DF 0 "register_operand" "=f")
++        (match_operand:DF 1 "const_0_operand" ""))]
++  "TARGET_LOONGSON_3A"
++  "xor %0,%0,%0"
++  [(set_attr "type" "logical")
++   (set_attr "mode" "DF")])
++
+ ;; 64-bit floating point moves
+ 
+ (define_expand "movdf"
+-- 
+2.9.2
+

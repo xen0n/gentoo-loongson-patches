@@ -1,0 +1,42 @@
+From 2630edc2df7c687004a78354ac73bbde113bdb3f Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Tue, 20 Oct 2015 12:25:13 +0800
+Subject: [PATCH 1/4] gcc-4.9.3: Set loongson3a to multilib.
+
+    mips/t-st: Set loongson3a to multilib.
+
+    The patch in src rpm was patch21.
+
+Change-Id: I8bcd294b6157100f9c758fbb589bdf681b5010ac
+---
+ gcc/config/mips/t-st | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/mips/t-st b/gcc/config/mips/t-st
+index 9f6a881..1565345 100644
+--- a/gcc/config/mips/t-st
++++ b/gcc/config/mips/t-st
+@@ -16,8 +16,8 @@
+ # along with GCC; see the file COPYING3.  If not see
+ # <http://www.gnu.org/licenses/>.
+ 
+-MULTILIB_OPTIONS = march=loongson2e/march=loongson2f mabi=n32/mabi=32/mabi=64 
+-MULTILIB_DIRNAMES = 2e 2f lib32 lib lib64
++MULTILIB_OPTIONS = march=loongson3a/march=loongson2e/march=loongson2f mabi=n32/mabi=32/mabi=64
++MULTILIB_DIRNAMES = 3a 2e 2f lib32 lib lib64
+ 
+ MULTILIB_OSDIRNAMES  = march.loongson2e/mabi.n32=../lib32/2e
+ MULTILIB_OSDIRNAMES += march.loongson2e/mabi.32=../lib/2e
+@@ -25,6 +25,9 @@ MULTILIB_OSDIRNAMES += march.loongson2e/mabi.64=../lib64/2e
+ MULTILIB_OSDIRNAMES += march.loongson2f/mabi.n32=../lib32/2f
+ MULTILIB_OSDIRNAMES += march.loongson2f/mabi.32=../lib/2f
+ MULTILIB_OSDIRNAMES += march.loongson2f/mabi.64=../lib64/2f
++MULTILIB_OSDIRNAMES += march.loongson3a/mabi.n32=../lib32/3a
++MULTILIB_OSDIRNAMES += march.loongson3a/mabi.32=../lib/3a
++MULTILIB_OSDIRNAMES += march.loongson3a/mabi.64=../lib64/3a
+ MULTILIB_OSDIRNAMES += mabi.n32=../lib32
+ MULTILIB_OSDIRNAMES += mabi.32=../lib
+ MULTILIB_OSDIRNAMES += mabi.64=../lib64
+-- 
+2.9.2
+

@@ -1,0 +1,36 @@
+diff --git a/sysdeps/unix/sysv/linux/mips/vfork.S b/sysdeps/unix/sysv/linux/mips/vfork.S
+--- a/sysdeps/unix/sysv/linux/mips/vfork.S
++++ b/sysdeps/unix/sysv/linux/mips/vfork.S
+@@ -106,6 +106,8 @@ L(error):
+ #endif
+ 	END(__vfork)
+ 
++#if IS_IN (libc)
+ libc_hidden_def(__vfork)
+ weak_alias (__vfork, vfork)
+ strong_alias (__vfork, __libc_vfork)
++#endif
+diff --git a/sysdeps/unix/sysv/linux/sparc/sparc32/vfork.S b/sysdeps/unix/sysv/linux/sparc/sparc32/vfork.S
+--- a/sysdeps/unix/sysv/linux/sparc/sparc32/vfork.S
++++ b/sysdeps/unix/sysv/linux/sparc/sparc32/vfork.S
+@@ -44,6 +44,8 @@ ENTRY(__vfork)
+ 	 nop
+ END(__vfork)
+ 
++#if IS_IN (libc)
+ libc_hidden_def (__vfork)
+ weak_alias (__vfork, vfork)
+ strong_alias (__vfork, __libc_vfork)
++#endif
+diff --git a/sysdeps/unix/sysv/linux/sparc/sparc64/vfork.S b/sysdeps/unix/sysv/linux/sparc/sparc64/vfork.S
+--- a/sysdeps/unix/sysv/linux/sparc/sparc64/vfork.S
++++ b/sysdeps/unix/sysv/linux/sparc/sparc64/vfork.S
+@@ -44,6 +44,8 @@ ENTRY(__vfork)
+ 	 nop
+ END(__vfork)
+ 
++#if IS_IN (libc)
+ libc_hidden_def (__vfork)
+ weak_alias (__vfork, vfork)
+ strong_alias (__vfork, __libc_vfork)
++#endif
