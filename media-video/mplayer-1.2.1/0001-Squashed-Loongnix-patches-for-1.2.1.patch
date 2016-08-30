@@ -1,0 +1,370 @@
+From a78dbafa770ddff943c96e96ade7fce4c61ed5f9 Mon Sep 17 00:00:00 2001
+From: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+Date: Thu, 20 Aug 2015 16:35:30 +0800
+Subject: [PATCH] Squashed Loongnix patches for 1.2.1
+
+configure: add loongson series cpu support
+
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+
+cpudetect: add loongson cpu flag
+
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+
+libvo: optimize fastmemcpy for loongson with mmi
+
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+
+tools: loongson add fastmemcpy test bench
+
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+
+configure: add ffmpeg header path to hostcflags
+
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+
+Drop requirement for libavutil/x86/asm.h with shared FFmpeg
+
+Change-Id: Ic874577da8b455d5a5610139b08088828ff970d8
+Signed-off-by: ZhouXiaoyong <zhouxiaoyong@loongson.cn>
+---
+ TOOLS/fastmem_mmi.sh    |   3 ++
+ TOOLS/fastmemcpybench.c |  23 ++++++++++
+ configure               |  30 ++++++++++++-
+ cpudetect.c             |   3 ++
+ libvo/aclib.c           |  12 +++++-
+ libvo/aclib_template.c  | 109 ++++++++++++++++++++++++++++++++++++++++++++++++
+ libvo/fastmemcpy.h      |   2 +-
+ 7 files changed, 177 insertions(+), 5 deletions(-)
+ create mode 100755 TOOLS/fastmem_mmi.sh
+
+diff --git a/TOOLS/fastmem_mmi.sh b/TOOLS/fastmem_mmi.sh
+new file mode 100755
+index 0000000..75d7441
+--- /dev/null
++++ b/TOOLS/fastmem_mmi.sh
+@@ -0,0 +1,3 @@
++#!/bin/bash
++
++gcc fastmemcpybench.c -o fastmemcpybench -static -L.. -I.. -march=loongson3a -O2 -g
+diff --git a/TOOLS/fastmemcpybench.c b/TOOLS/fastmemcpybench.c
+index 1acfe50..4cb41db 100644
+--- a/TOOLS/fastmemcpybench.c
++++ b/TOOLS/fastmemcpybench.c
+@@ -115,6 +115,12 @@
+ #include "libvo/aclib_template.c"
+ #endif
+ 
++#ifdef ARCH_LOONGSON
++#undef RENAME
++#define RENAME(a) a ## _MMI
++#include "libvo/aclib_template.c"
++#endif
++
+ //#define ARR_SIZE 100000
+ #define ARR_SIZE (1024*768*2)
+ 
+@@ -219,7 +225,24 @@ int main(void)
+     printf(name "CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t, \
+            100000000.0f / (float)t, (float)ARR_SIZE*95.36743f / (float)t);
+ 
++#define testblock_loongson(func, name)                                       \
++    t  = GetTimer();                                                         \
++    for (i = 0; i < 100; i++)                                                \
++        func(marr1, marr2, ARR_SIZE - 16);                                   \
++    t  = GetTimer() - t;                                                     \
++    /* ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t */   \
++    printf(name "CPU clocks=%dus  (%5.3ffps)  %5.1fMB/s\n", t, \
++           100000000.0f / (float)t, (float)ARR_SIZE*95.36743f / (float)t);
++
++#if ARCH_LOONGSON
++    testblock_loongson(memcpy, "libc:   ");
++#else
+     testblock(memcpy, "libc:   ");
++#endif
++
++#if ARCH_LOONGSON
++    testblock_loongson(fast_memcpy_MMI, "MMI:    ");
++#endif
+ 
+ #if HAVE_MMX
+     testblock(fast_memcpy_MMX, "MMX:    ");
+diff --git a/configure b/configure
+index 3a3579b..774020a 100755
+--- a/configure
++++ b/configure
+@@ -2025,7 +2025,7 @@ def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 0'
+ def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 0'
+ def_local_aligned_32='#define HAVE_LOCAL_ALIGNED_32 0'
+ arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC AARCH64'
+-subarch_all='X86_32 X86_64 PPC64'
++subarch_all='X86_32 X86_64 PPC64 LOONGSON'
+ case "$host_arch" in
+   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
+   arch='x86'
+@@ -2621,6 +2621,32 @@ EOF
+     arch='mips'
+     iproc='mips'
+ 
++    if linux; then
++    echocheck "CPU type"
++        pname=$($_cpuinfo | grep 'model' | cut -d ':' -f 2 | head -n 1)
++        case $pname in
++            *Loongson-3*)
++                subarch='loongson'
++                def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
++                def_av_fast_unaligned='#define AV_HAVE_FAST_UNALIGNED 1'
++                def_local_aligned_8='#define HAVE_LOCAL_ALIGNED_8 1'
++                def_local_aligned_16='#define HAVE_LOCAL_ALIGNED_16 1'
++                def_local_aligned_32='#define HAVE_LOCAL_ALIGNED_32 1'
++                def_fast_64bit='#define HAVE_FAST_64BIT 1'
++                _march='-march=loongson3a'
++                ;;
++            *Loongson-2*)
++                subarch='loongson'
++                _march='-march=mips3'
++                ;;
++            *Godson*)
++                subarch='loongson'
++                _march='-march=mips3'
++                ;;
++        esac
++        echores "$pname"
++    fi
++
+     if irix ; then
+         echocheck "CPU type"
+         proc=$(hinv -c processor | grep CPU | cut -d " " -f3)
+@@ -2808,7 +2834,7 @@ else
+ fi
+ 
+ CFLAGS="-D_ISOC99_SOURCE -I. -Iffmpeg $CFLAGS"
+-HOSTCFLAGS="-D_ISOC99_SOURCE -I. -Iffmpeg -O3"
++HOSTCFLAGS="-D_ISOC99_SOURCE -I. -Iffmpeg -I/usr/include/ffmpeg -O3"
+ 
+ # On glibc, add some more CPPFLAGS for enabling required functionality.
+ cpp_condition_check features.h "defined __GLIBC__" &&
+diff --git a/cpudetect.c b/cpudetect.c
+index 116a634..3cf873e 100644
+--- a/cpudetect.c
++++ b/cpudetect.c
+@@ -523,6 +523,9 @@ void GetCpuCaps( CpuCaps *caps)
+     if (ARCH_MIPS)
+         mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: MIPS\n");
+ 
++    if (ARCH_LOONGSON)
++        mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Loongson\n");
++
+     if (ARCH_PA_RISC)
+         mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Hewlett-Packard PA-RISC\n");
+ 
+diff --git a/libvo/aclib.c b/libvo/aclib.c
+index 17f0f8c..b21d515 100644
+--- a/libvo/aclib.c
++++ b/libvo/aclib.c
+@@ -155,6 +155,10 @@
+ 
+ #endif /* ARCH_X86 */
+ 
++#if ARCH_LOONGSON
++#define RENAME(a) a ## _MMI
++#include "aclib_template.c"
++#endif
+ 
+ #undef fast_memcpy
+ void * fast_memcpy(void * to, const void * from, size_t len)
+@@ -174,7 +178,9 @@ void * fast_memcpy(void * to, const void * from, size_t len)
+ #endif
+ 		memcpy(to, from, len); // prior to mmx we use the standart memcpy
+ #else
+-#if HAVE_SSE2
++#if ARCH_LOONGSON
++		fast_memcpy_MMI(to, from, len);
++#elif HAVE_SSE2
+ 		fast_memcpy_SSE(to, from, len);
+ #elif HAVE_MMX2
+ 		fast_memcpy_MMX2(to, from, len);
+@@ -208,7 +214,9 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
+ #endif
+ 		memcpy(to, from, len); // prior to mmx we use the standart memcpy
+ #else
+-#if HAVE_SSE2
++#if ARCH_LOONGSON
++		mem2agpcpy_MMI(to, from, len);
++#elif HAVE_SSE2
+ 		mem2agpcpy_SSE(to, from, len);
+ #elif HAVE_MMX2
+ 		mem2agpcpy_MMX2(to, from, len);
+diff --git a/libvo/aclib_template.c b/libvo/aclib_template.c
+index ee02d9a..24d2d83 100644
+--- a/libvo/aclib_template.c
++++ b/libvo/aclib_template.c
+@@ -98,6 +98,10 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
+ #define HAVE_K6_2PLUS
+ #endif
+ 
++#if ARCH_LOONGSON
++/* for small memory blocks (<256 bytes) this version is faster */
++#define small_memcpy memcpy
++#else
+ /* for small memory blocks (<256 bytes) this version is faster */
+ #define small_memcpy(to,from,n)\
+ {\
+@@ -111,10 +115,13 @@ __asm__ volatile(\
+         :"0" (to), "1" (from),"2" (n)\
+ 	: "memory");\
+ }
++#endif
+ 
+ #undef MMREG_SIZE
+ #if HAVE_SSE
+ #define MMREG_SIZE 16
++#elif ARCH_LOONGSON
++#define MMREG_SIZE 8
+ #else
+ #define MMREG_SIZE 64 //8
+ #endif
+@@ -147,10 +154,61 @@ __asm__ volatile(\
+ #undef MIN_LEN
+ #ifdef HAVE_ONLY_MMX1
+ #define MIN_LEN 0x800  /* 2K blocks */
++#elif ARCH_LOONGSON
++#define MIN_LEN 0x40
+ #else
+ #define MIN_LEN 0x40  /* 64-byte blocks */
+ #endif
+ 
++#if ARCH_LOONGSON
++static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
++{
++    void *retval;
++    size_t i;
++
++    retval = to;
++
++	__asm__ volatile (
++        "ld $0, (%0)                        \n"
++        "ld $0, 64(%0)                      \n"
++        "ld $0, 128(%0)                     \n"
++        "ld $0, 192(%0)                     \n"
++        "ld $0, 256(%0)                     \n"
++		::"r"(from)
++    );
++
++    if (len >= MIN_LEN && (((intptr_t)from) & 15) ==0
++                       && (((intptr_t)to  ) & 15) ==0) {
++        i = len >> 6; /* len/64 */
++        len &= 63;
++
++        for (; i>0; i--) {
++            __asm__ volatile (
++                "ld $0, 320(%[from])            \n"
++                "gslqc1 $f0, $f2, 0(%[from])    \n"
++                "gslqc1 $f4, $f6, 16(%[from])   \n"
++                "gslqc1 $f8, $f10, 32(%[from])  \n"
++                "gslqc1 $f12, $f14, 48(%[from]) \n"
++                "gssqc1 $f0, $f2, 0(%[to])      \n"
++                "gssqc1 $f4, $f6, 16(%[to])     \n"
++                "gssqc1 $f8, $f10, 32(%[to])    \n"
++                "gssqc1 $f12, $f14, 48(%[to])   \n"
++                ::[from]"r"(from),[to]"r"(to)
++                : "$f0","$f2","$f4","$f6","$f8","$f10","$f12","$f14"
++            );
++            from = ((const unsigned char *)from)+64;
++            to = ((unsigned char *)to)+64;
++        }
++    }
++    /*
++     *	Now do the tail of the block
++     */
++    if (len) small_memcpy(to, from, len);
++    return retval;
++}
++
++#else /* ARCH_LOONGSON */
++
+ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
+ {
+ 	void *retval;
+@@ -377,10 +435,60 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
+ 	if(len) small_memcpy(to, from, len);
+ 	return retval;
+ }
++#endif /* ARCH_LOONGSON */
+ 
+ /**
+  * special copy routine for mem -> agp/pci copy (based upon fast_memcpy)
+  */
++#if ARCH_LOONGSON
++static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
++{
++    void *retval;
++    size_t i;
++
++    retval = to;
++
++	__asm__ volatile (
++        "ld $0, (%0)                        \n"
++        "ld $0, 64(%0)                      \n"
++        "ld $0, 128(%0)                     \n"
++        "ld $0, 192(%0)                     \n"
++        "ld $0, 256(%0)                     \n"
++		::"r"(from)
++    );
++
++    if (len >= MIN_LEN && (((intptr_t)from) & 15) ==0
++                       && (((intptr_t)to  ) & 15) ==0) {
++        i = len >> 6; /* len/64 */
++        len &= 63;
++
++        for (; i>0; i--) {
++            __asm__ volatile (
++                "ld $0, 320(%[from])            \n"
++                "gslqc1 $f0, $f2, 0(%[from])    \n"
++                "gslqc1 $f4, $f6, 16(%[from])   \n"
++                "gslqc1 $f8, $f10, 32(%[from])  \n"
++                "gslqc1 $f12, $f14, 48(%[from]) \n"
++                "gssqc1 $f0, $f2, 0(%[to])      \n"
++                "gssqc1 $f4, $f6, 16(%[to])     \n"
++                "gssqc1 $f8, $f10, 32(%[to])    \n"
++                "gssqc1 $f12, $f14, 48(%[to])   \n"
++                ::[from]"r"(from),[to]"r"(to)
++                : "$f0","$f2","$f4","$f6","$f8","$f10","$f12","$f14"
++            );
++            from = ((const unsigned char *)from)+64;
++            to = ((unsigned char *)to)+64;
++        }
++    }
++    /*
++     *	Now do the tail of the block
++     */
++    if (len) small_memcpy(to, from, len);
++    return retval;
++}
++
++#else /* ARCH_LOONGSON */
++
+ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
+ {
+ 	void *retval;
+@@ -459,3 +567,4 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
+ 	if(len) small_memcpy(to, from, len);
+ 	return retval;
+ }
++#endif /* ARCH_LOONGSON */
+diff --git a/libvo/fastmemcpy.h b/libvo/fastmemcpy.h
+index 094d3ac..89ab04e 100644
+--- a/libvo/fastmemcpy.h
++++ b/libvo/fastmemcpy.h
+@@ -27,7 +27,7 @@
+ void * fast_memcpy(void * to, const void * from, size_t len);
+ void * mem2agpcpy(void * to, const void * from, size_t len);
+ 
+-#if ! defined(CONFIG_FASTMEMCPY) || ! (HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW /* || HAVE_SSE || HAVE_SSE2 */)
++#if ! defined(CONFIG_FASTMEMCPY) || ! (ARCH_LOONGSON || HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW /* || HAVE_SSE || HAVE_SSE2 */)
+ #define mem2agpcpy(a,b,c) memcpy(a,b,c)
+ #define fast_memcpy(a,b,c) memcpy(a,b,c)
+ #endif
+-- 
+2.9.2
+
