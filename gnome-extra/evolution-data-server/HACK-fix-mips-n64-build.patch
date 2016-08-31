@@ -1,0 +1,22 @@
+--- a/configure.ac	2016-08-31 14:59:55.685158383 +0800
++++ b/configure.ac	2016-08-31 14:59:42.475955436 +0800
+@@ -673,7 +673,7 @@
+ if test "x$with_libdb" != "xno" ; then
+ 	if test "x$with_libdb" != "xyes" ; then
+ 		DB_CFLAGS="$CFLAGS -I$with_libdb/include"
+-		DB_LIBS="$LIBS -L$with_libdb/lib -ldb"
++		DB_LIBS="$LIBS -L$with_libdb/lib64 -ldb"
+ 	else
+ 		if test -z "$DB_CFLAGS" -a -z "$DB_LIBS"; then
+ 			DB_CFLAGS="$CFLAGS"
+--- a/configure	2016-07-11 14:40:28.000000000 +0800
++++ b/configure	2016-08-31 15:10:07.798562961 +0800
+@@ -22250,7 +22250,7 @@
+ if test "x$with_libdb" != "xno" ; then
+ 	if test "x$with_libdb" != "xyes" ; then
+ 		DB_CFLAGS="$CFLAGS -I$with_libdb/include"
+-		DB_LIBS="$LIBS -L$with_libdb/lib -ldb"
++		DB_LIBS="$LIBS -L$with_libdb/lib64 -ldb"
+ 	else
+ 		if test -z "$DB_CFLAGS" -a -z "$DB_LIBS"; then
+ 			DB_CFLAGS="$CFLAGS"
