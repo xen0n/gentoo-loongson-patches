@@ -1,0 +1,26 @@
+From a82ab22f147a58de1942988b5e2ca5bc39cd995f Mon Sep 17 00:00:00 2001
+From: Huacai Chen <chenhc@lemote.com>
+Date: Wed, 22 Oct 2014 15:28:37 +0800
+Subject: [PATCH 04/16] Add sync around ll/sc and after branch target
+
+---
+ sysdeps/mips/sys/tas.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sysdeps/mips/sys/tas.h b/sysdeps/mips/sys/tas.h
+index 3e020a754e..444776347b 100644
+--- a/sysdeps/mips/sys/tas.h
++++ b/sysdeps/mips/sys/tas.h
+@@ -44,8 +44,8 @@ __NTH (_test_and_set (int *__p, int __v))
+ #if _MIPS_SIM == _ABIO32 && __mips < 2
+      ".set	mips2\n\t"
+ #endif
+-     "sync\n\t"
+      "1:\n\t"
++     "sync\n\t"
+      "ll	%0,%3\n\t"
+      "move	%1,%4\n\t"
+      "beq	%0,%4,2f\n\t"
+-- 
+2.16.1
+

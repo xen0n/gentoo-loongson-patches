@@ -1,0 +1,209 @@
+From 5a5296118d3fc55dd97a7d9d935a57d958ccb023 Mon Sep 17 00:00:00 2001
+From: Chenghua Xu <xuchenghua@loongson.cn>
+Date: Thu, 13 Oct 2016 14:38:47 +0800
+Subject: [PATCH 08/16] Fix glibc test after added fused madd.
+
+    Fused madd has more accuray then no fused madd,
+    Fix expected result to passed test.
+    sysdeps/mips/mips32/
+    * libm-test-ulps: Fixed.
+    sysdeps/mips/mips64/
+    * libm-test-ulps: Fixed.
+---
+ sysdeps/mips/mips32/libm-test-ulps | 32 ++++++++++++++++++++++----------
+ sysdeps/mips/mips64/libm-test-ulps | 32 ++++++++++++++++++++++----------
+ 2 files changed, 44 insertions(+), 20 deletions(-)
+
+diff --git a/sysdeps/mips/mips32/libm-test-ulps b/sysdeps/mips/mips32/libm-test-ulps
+index c6ee80095a..0d05eaba07 100644
+--- a/sysdeps/mips/mips32/libm-test-ulps
++++ b/sysdeps/mips/mips32/libm-test-ulps
+@@ -101,6 +101,10 @@ Function: "atan2":
+ float: 1
+ ifloat: 1
+ 
++Function: "atan":
++double: 1
++idouble: 1
++
+ Function: "atan2_downward":
+ double: 1
+ float: 2
+@@ -320,9 +324,9 @@ idouble: 5
+ ifloat: 3
+ 
+ Function: Real part of "casin_towardzero":
+-double: 3
++double: 4
+ float: 1
+-idouble: 3
++idouble: 4
+ ifloat: 1
+ 
+ Function: Imaginary part of "casin_towardzero":
+@@ -374,9 +378,9 @@ idouble: 5
+ ifloat: 3
+ 
+ Function: Imaginary part of "casinh_towardzero":
+-double: 3
++double: 4
+ float: 1
+-idouble: 3
++idouble: 4
+ ifloat: 1
+ 
+ Function: Real part of "casinh_upward":
+@@ -662,7 +666,9 @@ idouble: 3
+ ifloat: 3
+ 
+ Function: Imaginary part of "clog":
++double: 1
+ float: 1
++idouble: 1
+ ifloat: 1
+ 
+ Function: Real part of "clog10":
+@@ -797,9 +803,9 @@ ifloat: 2
+ 
+ Function: Real part of "cpow":
+ double: 2
+-float: 4
++float: 5
+ idouble: 2
+-ifloat: 4
++ifloat: 5
+ 
+ Function: Imaginary part of "cpow":
+ float: 2
+@@ -1027,15 +1033,15 @@ ifloat: 3
+ 
+ Function: Real part of "ctanh":
+ double: 2
+-float: 1
++float: 2
+ idouble: 2
+-ifloat: 1
++ifloat: 2
+ 
+ Function: Imaginary part of "ctanh":
+ double: 2
+-float: 2
++float: 1
+ idouble: 2
+-ifloat: 2
++ifloat: 1
+ 
+ Function: Real part of "ctanh_downward":
+ double: 4
+@@ -1465,6 +1471,12 @@ float: 1
+ idouble: 1
+ ifloat: 1
+ 
++Function: "pow_tonearest":
++float: 1
++ifloat: 1
++ildouble: 1
++ldouble: 1
++
+ Function: "pow_towardzero":
+ double: 1
+ float: 1
+diff --git a/sysdeps/mips/mips64/libm-test-ulps b/sysdeps/mips/mips64/libm-test-ulps
+index b3b0140abc..fa2f04d1a2 100644
+--- a/sysdeps/mips/mips64/libm-test-ulps
++++ b/sysdeps/mips/mips64/libm-test-ulps
+@@ -131,6 +131,10 @@ ifloat: 1
+ ildouble: 1
+ ldouble: 1
+ 
++Function: "atan":
++double: 1
++idouble: 1
++
+ Function: "atan2":
+ float: 1
+ ifloat: 1
+@@ -432,9 +436,9 @@ ildouble: 6
+ ldouble: 6
+ 
+ Function: Real part of "casin_towardzero":
+-double: 3
++double: 4
+ float: 1
+-idouble: 3
++idouble: 4
+ ifloat: 1
+ ildouble: 3
+ ldouble: 3
+@@ -504,9 +508,9 @@ ildouble: 5
+ ldouble: 5
+ 
+ Function: Imaginary part of "casinh_towardzero":
+-double: 3
++double: 4
+ float: 1
+-idouble: 3
++idouble: 4
+ ifloat: 1
+ ildouble: 3
+ ldouble: 3
+@@ -888,7 +892,9 @@ ildouble: 2
+ ldouble: 2
+ 
+ Function: Imaginary part of "clog":
++double: 1
+ float: 1
++idouble: 1
+ ifloat: 1
+ ildouble: 1
+ ldouble: 1
+@@ -1069,9 +1075,9 @@ ldouble: 3
+ 
+ Function: Real part of "cpow":
+ double: 2
+-float: 4
++float: 5
+ idouble: 2
+-ifloat: 4
++ifloat: 5
+ ildouble: 4
+ ldouble: 4
+ 
+@@ -1381,17 +1387,17 @@ ldouble: 5
+ 
+ Function: Real part of "ctanh":
+ double: 2
+-float: 1
++float: 2
+ idouble: 2
+-ifloat: 1
++ifloat: 2
+ ildouble: 3
+ ldouble: 3
+ 
+ Function: Imaginary part of "ctanh":
+ double: 2
+-float: 2
++float: 1
+ idouble: 2
+-ifloat: 2
++ifloat: 1
+ ildouble: 3
+ ldouble: 3
+ 
+@@ -1969,6 +1975,12 @@ ifloat: 1
+ ildouble: 2
+ ldouble: 2
+ 
++Function: "pow_tonearest":
++float: 1
++ifloat: 1
++ildouble: 1
++ldouble: 1
++
+ Function: "pow_towardzero":
+ double: 1
+ float: 1
+-- 
+2.16.1
+

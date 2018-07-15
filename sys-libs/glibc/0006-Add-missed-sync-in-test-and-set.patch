@@ -1,0 +1,28 @@
+From ef5631aaffcdabd99b66d55a9aaf2a85a8db9cc2 Mon Sep 17 00:00:00 2001
+From: Chenghua Xu <xuchenghua@loongson.cn>
+Date: Fri, 15 Dec 2017 11:24:18 +0800
+Subject: [PATCH 06/16] Add missed sync in test and set.
+
+---
+ sysdeps/mips/sys/tas.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/sysdeps/mips/sys/tas.h b/sysdeps/mips/sys/tas.h
+index 444776347b..3ad7b5d150 100644
+--- a/sysdeps/mips/sys/tas.h
++++ b/sysdeps/mips/sys/tas.h
+@@ -51,9 +51,10 @@ __NTH (_test_and_set (int *__p, int __v))
+      "beq	%0,%4,2f\n\t"
+      "sc	%1,%2\n\t"
+      "beqz	%1,1b\n"
+-     "sync\n\t"
++     "nop\n\t"
+      ".set	pop\n\t"
+      "2:\n\t"
++     "sync\n\t"
+      "/* End test and set */"
+      : "=&r" (__r), "=&r" (__t), "=m" (*__p)
+      : "m" (*__p), "r" (__v)
+-- 
+2.16.1
+

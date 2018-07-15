@@ -1,0 +1,115 @@
+From 03d7630915045032e413e942db21aa5894325ff8 Mon Sep 17 00:00:00 2001
+From: Chenghua Xu <xuchenghua@loongson.cn>
+Date: Tue, 31 May 2016 11:16:29 +0800
+Subject: [PATCH 05/16] Use ll/sc in pthread_spin_unlock.
+
+    sysdeps/mips/nptl/
+    * pthread_spin_unlock.c: New.
+    * pthread_spin_init.c: New.
+---
+ sysdeps/mips/nptl/pthread_spin_init.c   | 42 ++++++++++++++++++++++++++++++++
+ sysdeps/mips/nptl/pthread_spin_unlock.c | 43 +++++++++++++++++++++++++++++++++
+ 2 files changed, 85 insertions(+)
+ create mode 100644 sysdeps/mips/nptl/pthread_spin_init.c
+ create mode 100644 sysdeps/mips/nptl/pthread_spin_unlock.c
+
+diff --git a/sysdeps/mips/nptl/pthread_spin_init.c b/sysdeps/mips/nptl/pthread_spin_init.c
+new file mode 100644
+index 0000000000..bcd0afbfe3
+--- /dev/null
++++ b/sysdeps/mips/nptl/pthread_spin_init.c
+@@ -0,0 +1,42 @@
++/* pthread_spin_init -- initialize a spin lock.  Generic version.
++   Copyright (C) 2003-2014 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++   Contributed by Paul Mackerras <paulus@au.ibm.com>, 2003.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <http://www.gnu.org/licenses/>.  */
++
++#include "pthreadP.h"
++
++int
++__pthread_spin_init (pthread_spinlock_t *lock, int pshared)
++{
++  /* *lock = 0; */
++
++  unsigned int tmp;
++  asm volatile (".set mips64 \n\t"
++		"1:	\n\t"
++		"sync	\n\t"
++		"ll	%1, %2\n\t"
++		"movn	%1, $0, %1\n\t"
++		"sc	%1, %0\n\t"
++		"beqz	%1, 1b\n\t"
++		".set mips0	\n\t"
++		: "=m" (*lock), "=r" (tmp)
++		: "m" (*lock)
++		: "memory");
++
++  return 0;
++}
++weak_alias (__pthread_spin_init, pthread_spin_init)
+diff --git a/sysdeps/mips/nptl/pthread_spin_unlock.c b/sysdeps/mips/nptl/pthread_spin_unlock.c
+new file mode 100644
+index 0000000000..de3629ff7a
+--- /dev/null
++++ b/sysdeps/mips/nptl/pthread_spin_unlock.c
+@@ -0,0 +1,43 @@
++/* pthread_spin_unlock -- unlock a spin lock.  Generic version.
++   Copyright (C) 2003 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++   Contributed by Paul Mackerras <paulus@au.ibm.com>, 2003.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, write to the Free
++   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
++   02111-1307 USA.  */
++
++#include "pthreadP.h"
++#include <atomic.h>
++
++int
++__pthread_spin_unlock (pthread_spinlock_t *lock)
++{
++  /* atomic_full_barrier (); */
++  /* *lock = 0; */
++  unsigned int tmp;
++  asm volatile (".set mips64 \n\t"
++		"1:	\n\t"
++		"sync	\n\t"
++		"ll	%1, %2\n\t"
++		"movn	%1, $0, %1\n\t"
++		"sc	%1, %0\n\t"
++		"beqz	%1, 1b\n\t"
++		".set mips0	\n\t"
++		: "=m" (*lock), "=r" (tmp)
++		: "m" (*lock)
++		: "memory");
++  return 0;
++}
++weak_alias (__pthread_spin_unlock, pthread_spin_unlock)
+-- 
+2.16.1
+

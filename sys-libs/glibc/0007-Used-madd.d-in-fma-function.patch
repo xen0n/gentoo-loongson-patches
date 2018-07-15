@@ -1,0 +1,157 @@
+From 718b04702978455a59920bc349fb79bbbe34efd1 Mon Sep 17 00:00:00 2001
+From: Chenghua Xu <xuchenghua@loongson.cn>
+Date: Thu, 13 Oct 2016 14:32:30 +0800
+Subject: [PATCH 07/16] Used-madd.d-in-fma-function
+
+    Used madd.d in fma() function.
+    sysdeps/mips/fpu/
+    * s_fma.c: New.
+    * s_fmaf.c: New.
+    sysdeps/mips/mips32/fpu/
+    * s_fma.c: New.
+    * s_fmaf.c: New.
+    sysdeps/mips/mips64/n32/fpu/
+    * s_fma.c: New.
+    * s_fmaf.c: New.
+    sysdeps/mips/mips64/n64/fpu/
+    * s_fma.c: New.
+    * s_fmaf.c: New.
+---
+ sysdeps/mips/fpu/s_fma.c             | 32 ++++++++++++++++++++++++++++++++
+ sysdeps/mips/fpu/s_fmaf.c            | 31 +++++++++++++++++++++++++++++++
+ sysdeps/mips/mips32/fpu/s_fma.c      |  1 +
+ sysdeps/mips/mips32/fpu/s_fmaf.c     |  1 +
+ sysdeps/mips/mips64/n32/fpu/s_fma.c  |  1 +
+ sysdeps/mips/mips64/n32/fpu/s_fmaf.c |  1 +
+ sysdeps/mips/mips64/n64/fpu/s_fma.c  |  1 +
+ sysdeps/mips/mips64/n64/fpu/s_fmaf.c |  1 +
+ 8 files changed, 69 insertions(+)
+ create mode 100644 sysdeps/mips/fpu/s_fma.c
+ create mode 100644 sysdeps/mips/fpu/s_fmaf.c
+ create mode 100644 sysdeps/mips/mips32/fpu/s_fma.c
+ create mode 100644 sysdeps/mips/mips32/fpu/s_fmaf.c
+ create mode 100644 sysdeps/mips/mips64/n32/fpu/s_fma.c
+ create mode 100644 sysdeps/mips/mips64/n32/fpu/s_fmaf.c
+ create mode 100644 sysdeps/mips/mips64/n64/fpu/s_fma.c
+ create mode 100644 sysdeps/mips/mips64/n64/fpu/s_fmaf.c
+
+diff --git a/sysdeps/mips/fpu/s_fma.c b/sysdeps/mips/fpu/s_fma.c
+new file mode 100644
+index 0000000000..be2882b0b4
+--- /dev/null
++++ b/sysdeps/mips/fpu/s_fma.c
+@@ -0,0 +1,32 @@
++/* Compute x * y + z as ternary operation.  MIPS fused madd version.
++   Copyright (C) 2010-2014 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++   Contributed by Jakub Jelinek <jakub@redhat.com>, 2010.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <http://www.gnu.org/licenses/>.  */
++
++#include <math.h>
++
++double
++__fma (double x, double y, double z)
++{
++  double r;
++  asm ("madd.d %0,%3,%1,%2" : "=f" (r) : "f" (x), "f" (y), "f" (z));
++  return r;
++}
++#ifndef __fma
++weak_alias (__fma, fma)
++#endif
++
+diff --git a/sysdeps/mips/fpu/s_fmaf.c b/sysdeps/mips/fpu/s_fmaf.c
+new file mode 100644
+index 0000000000..49e90675a6
+--- /dev/null
++++ b/sysdeps/mips/fpu/s_fmaf.c
+@@ -0,0 +1,31 @@
++/* Compute x * y + z as ternary operation.  MIPS fused madd version.
++   Copyright (C) 2010-2014 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++   Contributed by Jakub Jelinek <jakub@redhat.com>, 2010.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <http://www.gnu.org/licenses/>.  */
++
++#include <math.h>
++
++float
++__fmaf (float x, float y, float z)
++{
++  float r;
++  asm ("madd.s %0,%3,%1,%2" : "=f" (r) : "f" (x), "f" (y), "f" (z));
++  return r;
++}
++#ifndef __fmaf
++weak_alias (__fmaf, fmaf)
++#endif
+diff --git a/sysdeps/mips/mips32/fpu/s_fma.c b/sysdeps/mips/mips32/fpu/s_fma.c
+new file mode 100644
+index 0000000000..e2c98a9992
+--- /dev/null
++++ b/sysdeps/mips/mips32/fpu/s_fma.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fma.c>
+diff --git a/sysdeps/mips/mips32/fpu/s_fmaf.c b/sysdeps/mips/mips32/fpu/s_fmaf.c
+new file mode 100644
+index 0000000000..eb08b3433f
+--- /dev/null
++++ b/sysdeps/mips/mips32/fpu/s_fmaf.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fmaf.c>
+diff --git a/sysdeps/mips/mips64/n32/fpu/s_fma.c b/sysdeps/mips/mips64/n32/fpu/s_fma.c
+new file mode 100644
+index 0000000000..e2c98a9992
+--- /dev/null
++++ b/sysdeps/mips/mips64/n32/fpu/s_fma.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fma.c>
+diff --git a/sysdeps/mips/mips64/n32/fpu/s_fmaf.c b/sysdeps/mips/mips64/n32/fpu/s_fmaf.c
+new file mode 100644
+index 0000000000..eb08b3433f
+--- /dev/null
++++ b/sysdeps/mips/mips64/n32/fpu/s_fmaf.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fmaf.c>
+diff --git a/sysdeps/mips/mips64/n64/fpu/s_fma.c b/sysdeps/mips/mips64/n64/fpu/s_fma.c
+new file mode 100644
+index 0000000000..e2c98a9992
+--- /dev/null
++++ b/sysdeps/mips/mips64/n64/fpu/s_fma.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fma.c>
+diff --git a/sysdeps/mips/mips64/n64/fpu/s_fmaf.c b/sysdeps/mips/mips64/n64/fpu/s_fmaf.c
+new file mode 100644
+index 0000000000..eb08b3433f
+--- /dev/null
++++ b/sysdeps/mips/mips64/n64/fpu/s_fmaf.c
+@@ -0,0 +1 @@
++#include <sysdeps/mips/fpu/s_fmaf.c>
+-- 
+2.16.1
+
