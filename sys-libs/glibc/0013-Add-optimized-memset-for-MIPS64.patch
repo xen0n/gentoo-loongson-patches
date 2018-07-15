@@ -1,4 +1,4 @@
-From f6e77ef69a1fad77486651162a9e80a798e29890 Mon Sep 17 00:00:00 2001
+From 3191c52e9a736920afd03e323838e5074acb585d Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 10:59:47 +0800
 Subject: [PATCH 13/16] Add optimized memset for MIPS64

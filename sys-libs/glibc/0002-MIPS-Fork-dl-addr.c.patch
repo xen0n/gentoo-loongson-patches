@@ -1,21 +1,21 @@
-From 495028240adfd43352c9564f66ff618bd73a65bb Mon Sep 17 00:00:00 2001
+From 4bdc7d9a3965705b1a8eebe4f49ea9c3ba0dac38 Mon Sep 17 00:00:00 2001
 From: Heiher <r@hev.cc>
 Date: Fri, 29 Dec 2017 11:24:36 +0800
 Subject: [PATCH 02/16] MIPS: Fork dl-addr.c.
 
 ---
- sysdeps/mips/dl-addr.c | 146 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 146 insertions(+)
+ sysdeps/mips/dl-addr.c | 145 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 145 insertions(+)
  create mode 100644 sysdeps/mips/dl-addr.c
 
 diff --git a/sysdeps/mips/dl-addr.c b/sysdeps/mips/dl-addr.c
 new file mode 100644
-index 0000000000..1fac63d1a9
+index 0000000000..60073dcee6
 --- /dev/null
 +++ b/sysdeps/mips/dl-addr.c
-@@ -0,0 +1,146 @@
+@@ -0,0 +1,145 @@
 +/* Locate the shared object symbol nearest a given address.
-+   Copyright (C) 1996-2017 Free Software Foundation, Inc.
++   Copyright (C) 1996-2018 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
@@ -137,7 +137,6 @@ index 0000000000..1fac63d1a9
 +
 +
 +int
-+internal_function
 +_dl_addr (const void *address, Dl_info *info,
 +	  struct link_map **mapp, const ElfW(Sym) **symbolp)
 +{

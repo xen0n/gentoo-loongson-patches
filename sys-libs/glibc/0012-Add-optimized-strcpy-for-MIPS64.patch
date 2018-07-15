@@ -1,4 +1,4 @@
-From 94be84355a15d7d867dfe63997ae70efcdd6f34d Mon Sep 17 00:00:00 2001
+From 16069e2b4fd5a27676aae245ac69266314850470 Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 10:59:28 +0800
 Subject: [PATCH 12/16] Add optimized strcpy for MIPS64

@@ -1,4 +1,4 @@
-From ddb34204c2cb0f19f77584d4ba77500e76ddc502 Mon Sep 17 00:00:00 2001
+From 9aed1572322378e7bf3b0bd36ec8674376fca6be Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 11:02:13 +0800
 Subject: [PATCH 14/16] Add optimized strchr for MIPS64

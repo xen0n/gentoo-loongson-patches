@@ -1,4 +1,4 @@
-From 5fbf299161dc582073db98e849dcfb481158d585 Mon Sep 17 00:00:00 2001
+From 829f6a53ec54fcca44920ce4e3df9e065c543038 Mon Sep 17 00:00:00 2001
 From: Heiher <r@hev.cc>
 Date: Tue, 5 Jan 2016 10:55:38 +0800
 Subject: [PATCH 03/16] MIPS: Add gnu xhash.
@@ -12,7 +12,7 @@ Subject: [PATCH 03/16] MIPS: Add gnu xhash.
  5 files changed, 31 insertions(+), 29 deletions(-)
 
 diff --git a/elf/elf.h b/elf/elf.h
-index 3900b4c9f0..995b23d449 100644
+index 954f3266f7..65c6e585c9 100644
 --- a/elf/elf.h
 +++ b/elf/elf.h
 @@ -447,6 +447,7 @@ typedef struct
@@ -23,7 +23,7 @@ index 3900b4c9f0..995b23d449 100644
  #define SHT_GNU_ATTRIBUTES 0x6ffffff5	/* Object attributes.  */
  #define SHT_GNU_HASH	  0x6ffffff6	/* GNU-style hash table.  */
  #define SHT_GNU_LIBLIST	  0x6ffffff7	/* Prelink library list */
-@@ -876,6 +877,7 @@ typedef struct
+@@ -894,6 +895,7 @@ typedef struct
     If any adjustment is made to the ELF object after it has been
     built these entries will need to be adjusted.  */
  #define DT_ADDRRNGLO	0x6ffffe00
@@ -31,7 +31,7 @@ index 3900b4c9f0..995b23d449 100644
  #define DT_GNU_HASH	0x6ffffef5	/* GNU-style hash table.  */
  #define DT_TLSDESC_PLT	0x6ffffef6
  #define DT_TLSDESC_GOT	0x6ffffef7
-@@ -889,7 +891,7 @@ typedef struct
+@@ -907,7 +909,7 @@ typedef struct
  #define DT_SYMINFO	0x6ffffeff	/* Syminfo table.  */
  #define DT_ADDRRNGHI	0x6ffffeff
  #define DT_ADDRTAGIDX(tag)	(DT_ADDRRNGHI - (tag))	/* Reverse order! */
@@ -41,7 +41,7 @@ index 3900b4c9f0..995b23d449 100644
  /* The versioning entry types.  The next are defined as part of the
     GNU extension.  */
 diff --git a/elf/get-dynamic-info.h b/elf/get-dynamic-info.h
-index 7525c3a5b2..a3e54db99f 100644
+index d1bbd817be..bdbf329a52 100644
 --- a/elf/get-dynamic-info.h
 +++ b/elf/get-dynamic-info.h
 @@ -112,6 +112,8 @@ elf_get_dynamic_info (struct link_map *l, ElfW(Dyn) *temp)
@@ -54,7 +54,7 @@ index 7525c3a5b2..a3e54db99f 100644
        assert (cnt <= DL_RO_DYN_TEMP_CNT);
      }
 diff --git a/sysdeps/mips/dl-addr.c b/sysdeps/mips/dl-addr.c
-index 1fac63d1a9..bc7b9aa6e7 100644
+index 60073dcee6..8bcf551707 100644
 --- a/sysdeps/mips/dl-addr.c
 +++ b/sysdeps/mips/dl-addr.c
 @@ -42,34 +42,27 @@ determine_info (const ElfW(Addr) addr, struct link_map *match, Dl_info *info,
@@ -111,10 +111,10 @@ index 1fac63d1a9..bc7b9aa6e7 100644
      }
    else
 diff --git a/sysdeps/mips/dl-lookup.c b/sysdeps/mips/dl-lookup.c
-index 3d2369dbf2..d058675b8d 100644
+index 41dced0e19..68ae43d210 100644
 --- a/sysdeps/mips/dl-lookup.c
 +++ b/sysdeps/mips/dl-lookup.c
-@@ -419,7 +419,9 @@ do_lookup_x (const char *undef_name, uint_fast32_t new_hash,
+@@ -402,7 +402,9 @@ do_lookup_x (const char *undef_name, uint_fast32_t new_hash,
  		  do
  		    if (((*hasharr ^ new_hash) >> 1) == 0)
  		      {
@@ -125,7 +125,7 @@ index 3d2369dbf2..d058675b8d 100644
  			sym = check_match (undef_name, ref, version, flags,
  					   type_class, &symtab[symidx], symidx,
  					   strtab, map, &versioned_sym,
-@@ -956,12 +958,12 @@ _dl_setup_hash (struct link_map *map)
+@@ -936,12 +938,12 @@ _dl_setup_hash (struct link_map *map)
  {
    Elf_Symndx *hash;
  
@@ -140,7 +140,7 @@ index 3d2369dbf2..d058675b8d 100644
  				      + DT_THISPROCNUM + DT_VERSIONTAGNUM
  				      + DT_EXTRANUM + DT_VALNUM]);
        map->l_nbuckets = *hash32++;
-@@ -978,6 +980,8 @@ _dl_setup_hash (struct link_map *map)
+@@ -958,6 +960,8 @@ _dl_setup_hash (struct link_map *map)
        map->l_gnu_buckets = hash32;
        hash32 += map->l_nbuckets;
        map->l_gnu_chain_zero = hash32 - symbias;

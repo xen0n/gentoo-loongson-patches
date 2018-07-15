@@ -1,4 +1,4 @@
-From bf50bc0e68c0dc2291d7f022998ab5c9f4532b14 Mon Sep 17 00:00:00 2001
+From 5bfc6dd948e14f14ecb2df8a5e91caa6276f022a Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 11:03:03 +0800
 Subject: [PATCH 16/16] Add optimized strnlen for MIPS64

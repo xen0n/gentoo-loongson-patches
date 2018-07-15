@@ -1,4 +1,4 @@
-From 03d7630915045032e413e942db21aa5894325ff8 Mon Sep 17 00:00:00 2001
+From d0397f05a6861e1acd1644578a6ec381f1ad1c53 Mon Sep 17 00:00:00 2001
 From: Chenghua Xu <xuchenghua@loongson.cn>
 Date: Tue, 31 May 2016 11:16:29 +0800
 Subject: [PATCH 05/16] Use ll/sc in pthread_spin_unlock.

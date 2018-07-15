@@ -1,4 +1,4 @@
-From 5a5296118d3fc55dd97a7d9d935a57d958ccb023 Mon Sep 17 00:00:00 2001
+From 36bdecc1298812571bf0d19bd493b2aa44e890e1 Mon Sep 17 00:00:00 2001
 From: Chenghua Xu <xuchenghua@loongson.cn>
 Date: Thu, 13 Oct 2016 14:38:47 +0800
 Subject: [PATCH 08/16] Fix glibc test after added fused madd.
@@ -10,12 +10,12 @@ Subject: [PATCH 08/16] Fix glibc test after added fused madd.
     sysdeps/mips/mips64/
     * libm-test-ulps: Fixed.
 ---
- sysdeps/mips/mips32/libm-test-ulps | 32 ++++++++++++++++++++++----------
- sysdeps/mips/mips64/libm-test-ulps | 32 ++++++++++++++++++++++----------
- 2 files changed, 44 insertions(+), 20 deletions(-)
+ sysdeps/mips/mips32/libm-test-ulps | 24 ++++++++++++++++++------
+ sysdeps/mips/mips64/libm-test-ulps | 24 ++++++++++++++++++------
+ 2 files changed, 36 insertions(+), 12 deletions(-)
 
 diff --git a/sysdeps/mips/mips32/libm-test-ulps b/sysdeps/mips/mips32/libm-test-ulps
-index c6ee80095a..0d05eaba07 100644
+index ad82ba26c1..da021ee535 100644
 --- a/sysdeps/mips/mips32/libm-test-ulps
 +++ b/sysdeps/mips/mips32/libm-test-ulps
 @@ -101,6 +101,10 @@ Function: "atan2":
@@ -63,9 +63,9 @@ index c6ee80095a..0d05eaba07 100644
  ifloat: 1
  
  Function: Real part of "clog10":
-@@ -797,9 +803,9 @@ ifloat: 2
+@@ -709,9 +715,9 @@ ifloat: 5
  
- Function: Real part of "cpow":
+ Function: Imaginary part of "clog10_upward":
  double: 2
 -float: 4
 +float: 5
@@ -73,29 +73,9 @@ index c6ee80095a..0d05eaba07 100644
 -ifloat: 4
 +ifloat: 5
  
- Function: Imaginary part of "cpow":
- float: 2
-@@ -1027,15 +1033,15 @@ ifloat: 3
- 
- Function: Real part of "ctanh":
- double: 2
--float: 1
-+float: 2
- idouble: 2
--ifloat: 1
-+ifloat: 2
- 
- Function: Imaginary part of "ctanh":
- double: 2
--float: 2
-+float: 1
- idouble: 2
--ifloat: 2
-+ifloat: 1
- 
- Function: Real part of "ctanh_downward":
+ Function: Real part of "clog_downward":
  double: 4
-@@ -1465,6 +1471,12 @@ float: 1
+@@ -1449,6 +1455,12 @@ float: 1
  idouble: 1
  ifloat: 1
  
@@ -109,7 +89,7 @@ index c6ee80095a..0d05eaba07 100644
  double: 1
  float: 1
 diff --git a/sysdeps/mips/mips64/libm-test-ulps b/sysdeps/mips/mips64/libm-test-ulps
-index b3b0140abc..fa2f04d1a2 100644
+index 908ec20668..910418f8c9 100644
 --- a/sysdeps/mips/mips64/libm-test-ulps
 +++ b/sysdeps/mips/mips64/libm-test-ulps
 @@ -131,6 +131,10 @@ ifloat: 1
@@ -157,9 +137,9 @@ index b3b0140abc..fa2f04d1a2 100644
  ifloat: 1
  ildouble: 1
  ldouble: 1
-@@ -1069,9 +1075,9 @@ ldouble: 3
+@@ -1691,9 +1697,9 @@ ldouble: 2
  
- Function: Real part of "cpow":
+ Function: "j0_downward":
  double: 2
 -float: 4
 +float: 5
@@ -169,29 +149,7 @@ index b3b0140abc..fa2f04d1a2 100644
  ildouble: 4
  ldouble: 4
  
-@@ -1381,17 +1387,17 @@ ldouble: 5
- 
- Function: Real part of "ctanh":
- double: 2
--float: 1
-+float: 2
- idouble: 2
--ifloat: 1
-+ifloat: 2
- ildouble: 3
- ldouble: 3
- 
- Function: Imaginary part of "ctanh":
- double: 2
--float: 2
-+float: 1
- idouble: 2
--ifloat: 2
-+ifloat: 1
- ildouble: 3
- ldouble: 3
- 
-@@ -1969,6 +1975,12 @@ ifloat: 1
+@@ -1945,6 +1951,12 @@ ifloat: 1
  ildouble: 2
  ldouble: 2
  

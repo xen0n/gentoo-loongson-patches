@@ -1,4 +1,4 @@
-From fc7c109e0ee9501ddb30a0ebcda6dcb2f6a28c87 Mon Sep 17 00:00:00 2001
+From c6c7d1d9406ca7d5f9cfa00bff87a3747b7f5090 Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 11:02:34 +0800
 Subject: [PATCH 15/16] Add optimized strchrnul for MIPS64

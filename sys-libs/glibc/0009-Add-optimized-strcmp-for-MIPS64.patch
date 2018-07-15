@@ -1,4 +1,4 @@
-From 413500ff36f19fcee58a3631c7d161254645d5eb Mon Sep 17 00:00:00 2001
+From dda4db083dbdc961b3fa8b60f8e1b6fed8c70b1f Mon Sep 17 00:00:00 2001
 From: Huang Pei <huangpei@loongson.cn>
 Date: Mon, 4 Jul 2016 10:57:43 +0800
 Subject: [PATCH 09/16] Add optimized strcmp for MIPS64

@@ -1,4 +1,4 @@
-From a82ab22f147a58de1942988b5e2ca5bc39cd995f Mon Sep 17 00:00:00 2001
+From 41000a54a890e03c5b3751b166174b006d703328 Mon Sep 17 00:00:00 2001
 From: Huacai Chen <chenhc@lemote.com>
 Date: Wed, 22 Oct 2014 15:28:37 +0800
 Subject: [PATCH 04/16] Add sync around ll/sc and after branch target
@@ -8,7 +8,7 @@ Subject: [PATCH 04/16] Add sync around ll/sc and after branch target
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/sysdeps/mips/sys/tas.h b/sysdeps/mips/sys/tas.h
-index 3e020a754e..444776347b 100644
+index d5ed013e28..77e088c7bc 100644
 --- a/sysdeps/mips/sys/tas.h
 +++ b/sysdeps/mips/sys/tas.h
 @@ -44,8 +44,8 @@ __NTH (_test_and_set (int *__p, int __v))
