@@ -1,0 +1,41 @@
+From 9cc312ddff947cdeda4dd96972a557a06d5125d1 Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Tue, 27 Jun 2017 20:50:24 +0800
+Subject: [PATCH 7/7] gcc-4.9.3: Added pandn costs for use nor and and inst.
+
+    gcc/config/mips
+    * mips.c (mips_rtx_costs): Added pandn costs.
+
+Change-Id: I03681dd54cf0bb69a386fd19ae90510021f4b767
+---
+ gcc/config/mips/mips.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/gcc/config/mips/mips.c b/gcc/config/mips/mips.c
+index 777881c04cf..cd851af1be1 100644
+--- a/gcc/config/mips/mips.c
++++ b/gcc/config/mips/mips.c
+@@ -3996,6 +3996,20 @@ mips_rtx_costs (rtx x, machine_mode mode, int outer_code,
+ 		    + set_src_cost (XEXP (XEXP (x, 1), 0), mode, speed));
+ 	  return true;
+ 	}
++
++      /* (AND (NOT op0) op1) is a loongson mx64 insn that should done by following insns
++       *  dmtc1 op0 fop0 #4 cycles
++       *  dmtc1 op1 fop1 #4 cycles
++       *  pandn fdest fop0 fop1 #1 cycles
++       *  dmfc1 dest fdest. #4 cycles
++       */
++      if (TARGET_LOONGSON_3A
++	  && GET_CODE (XEXP (x, 0)) == NOT
++	  && GET_CODE (XEXP (x, 1)) == REG)
++	{
++          *total = 52; /* costs */
++	  return true;
++	}
+ 	    
+       /* Fall through.  */
+ 
+-- 
+2.13.3
+

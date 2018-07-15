@@ -1,0 +1,28 @@
+From 6f18264d68b160f5fc9ea230bf12d17bc8b46b92 Mon Sep 17 00:00:00 2001
+From: Paul Hua <paul.hua.gm@gmail.com>
+Date: Mon, 5 Jun 2017 18:07:18 +0800
+Subject: [PATCH 5/7] Set ld default target to n64 abi.
+
+    ld/configure.tgt: set targ_emul to elf64ltsmip.
+---
+ ld/configure.tgt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index 7897448e64..afca4f0d80 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -535,8 +535,8 @@ mips*el-*-vxworks*)	targ_emul=elf32elmipvxworks
+ mips*-*-vxworks*)	targ_emul=elf32ebmipvxworks
+ 			targ_extra_emuls="elf32elmipvxworks" ;;
+ mips*-*-windiss)	targ_emul=elf32mipswindiss ;;
+-mips64*el-*-linux-*)	targ_emul=elf32ltsmipn32
+-			targ_extra_emuls="elf32btsmipn32 elf32ltsmip elf32btsmip elf64ltsmip elf64btsmip"
++mips64*el-*-linux-*)	targ_emul=elf64ltsmip
++			targ_extra_emuls="elf64ltsmip elf32ltsmipn32 elf32ltsmip elf32btsmipn32 elf32btsmip elf64btsmip"
+ 			targ_extra_libpath=$targ_extra_emuls ;;
+ mips64*-*-linux-*)	targ_emul=elf32btsmipn32
+ 			targ_extra_emuls="elf32ltsmipn32 elf32btsmip elf32ltsmip elf64btsmip elf64ltsmip"
+-- 
+2.16.1
+

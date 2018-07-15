@@ -1,26 +1,18 @@
-From 629ace3802ae4bfea5b96ae46259193faf1c89f7 Mon Sep 17 00:00:00 2001
+From 8048673834304cb3f904f9f3bbfe4a57585557dd Mon Sep 17 00:00:00 2001
 From: xuchenghua <xuchenghua@loongson.cn>
-Date: Mon, 26 Oct 2015 19:34:04 +0800
-Subject: [PATCH 2/2] binutils-2.25: Fix gslwlec1 gslwgtc1 gsldlec1 gsldgtc1
- insn coded.
+Date: Tue, 12 Dec 2017 09:00:49 +0800
+Subject: [PATCH 3/7] Fix gslwlec1 gslwgtc1 gsldlec1 gsldgtc1 insn coded.
 
-    opcodes/mips-opc.c: Fixed insn coded.
-
-Change-Id: I060182b8012c12b032aa37f17c1a7639c4f821f4
-
-[Ported to binutils 2.25 by @xen0n.]
-
-Conflicts:
-	opcodes/mips-opc.c
+opcodes/mips-opc.c: Fixed insn coded.
 ---
  opcodes/mips-opc.c | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/opcodes/mips-opc.c b/opcodes/mips-opc.c
-index 402f887..4a5f67e 100644
+index b0c6195300..b7ef9e683f 100644
 --- a/opcodes/mips-opc.c
 +++ b/opcodes/mips-opc.c
-@@ -462,10 +462,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
+@@ -470,10 +470,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
  {"gsswgt",		"t,b,d",	0xe8000015, 0xfc0007ff,	RD_1|RD_2|RD_3|SM,	0,		IL3A,		0,	0 },
  {"gssdle",		"t,b,d",	0xe8000016, 0xfc0007ff,	RD_1|RD_2|RD_3|SM,	0,		IL3A,		0,	0 },
  {"gssdgt",		"t,b,d",	0xe8000017, 0xfc0007ff,	RD_1|RD_2|RD_3|SM,	0,		IL3A,		0,	0 },
@@ -36,5 +28,5 @@ index 402f887..4a5f67e 100644
  {"gsswgtc1",		"T,b,d",	0xe800001d, 0xfc0007ff,	RD_1|RD_2|RD_3|SM,	0,		IL3A,		0,	0 },
  {"gssdlec1",		"T,b,d",	0xe800001e, 0xfc0007ff,	RD_1|RD_2|RD_3|SM,	0,		IL3A,		0,	0 },
 -- 
-2.9.2
+2.16.1
 

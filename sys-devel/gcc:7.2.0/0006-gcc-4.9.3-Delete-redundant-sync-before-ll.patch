@@ -1,0 +1,38 @@
+From 1a8cbb7bf42170024751edc89626ec3d6735338b Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Fri, 26 May 2017 09:12:31 +0800
+Subject: [PATCH 6/7] gcc-4.9.3: Delete redundant sync before ll.
+
+    gcc/config/mips
+    * mips.c (mips_process_sync_loop): Delete redundant sync.
+---
+ gcc/config/mips/mips.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/mips/mips.c b/gcc/config/mips/mips.c
+index 76f25103e24..777881c04cf 100644
+--- a/gcc/config/mips/mips.c
++++ b/gcc/config/mips/mips.c
+@@ -13545,7 +13545,8 @@ mips_process_sync_loop (rtx_insn *insn, rtx *operands)
+   mips_multi_start ();
+ 
+   /* Output the release side of the memory barrier.  */
+-  if (need_atomic_barrier_p (model, true))
++  /* The loongson3a need sync after label "1:", disable this */
++  if (need_atomic_barrier_p (model, true) && ! TARGET_LOONGSON_3A)
+     {
+       if (required_oldval == 0 && TARGET_OCTEON)
+ 	{
+@@ -13675,7 +13676,8 @@ mips_process_sync_loop (rtx_insn *insn, rtx *operands)
+     mips_multi_add_insn ("li\t%0,1", cmp, NULL);
+ 
+   /* Output the acquire side of the memory barrier.  */
+-  if (TARGET_SYNC_AFTER_SC && need_atomic_barrier_p (model, false))
++  /* The loongson3a need sync after label "2:", disable this */
++  if (TARGET_SYNC_AFTER_SC && need_atomic_barrier_p (model, false) && ! TARGET_LOONGSON_3A)
+     mips_multi_add_insn ("sync", NULL);
+ 
+   /* Output the exit label, if needed.  */
+-- 
+2.13.3
+
