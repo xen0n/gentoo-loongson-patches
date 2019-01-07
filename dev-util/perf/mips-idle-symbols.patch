@@ -1,7 +1,7 @@
 diff --git a/tools/perf/util/symbol.c b/tools/perf/util/symbol.c
 index f29f336..c4c5032 100644
---- a/tools/perf/util/symbol.c
-+++ b/tools/perf/util/symbol.c
+--- a/util/symbol.c
++++ b/util/symbol.c
 @@ -555,6 +555,7 @@ bool symbol__is_idle(struct symbol *sym)
  		"poll_idle",
  		"ppc64_runlatch_off",
