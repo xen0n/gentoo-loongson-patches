@@ -1,0 +1,164 @@
+From 43fec9fc6c3c240b63e4bc2e010ed8438ed15b26 Mon Sep 17 00:00:00 2001
+From: Heiher <r@hev.cc>
+Date: Tue, 5 Jan 2016 10:55:38 +0800
+Subject: [PATCH 03/16] MIPS: Add gnu xhash.
+
+[@xen0n: rebased to 2.28]
+---
+ elf/elf.h                |  4 +++-
+ elf/get-dynamic-info.h   |  1 +
+ sysdeps/mips/dl-addr.c   | 42 ++++++++++++++++--------------------------
+ sysdeps/mips/dl-lookup.c | 14 +++++++-------
+ sysdeps/mips/linkmap.h   |  1 +
+ 5 files changed, 28 insertions(+), 34 deletions(-)
+
+diff --git a/elf/elf.h b/elf/elf.h
+index 7e2b072a7f..b6d2bcdf72 100644
+--- a/elf/elf.h
++++ b/elf/elf.h
+@@ -447,6 +447,7 @@ typedef struct
+ #define SHT_SYMTAB_SHNDX  18		/* Extended section indeces */
+ #define	SHT_NUM		  19		/* Number of defined types.  */
+ #define SHT_LOOS	  0x60000000	/* Start OS-specific.  */
++#define SHT_GNU_XHASH	  0x6ffffff4	/* GNU-style hash table with xlat.  */
+ #define SHT_GNU_ATTRIBUTES 0x6ffffff5	/* Object attributes.  */
+ #define SHT_GNU_HASH	  0x6ffffff6	/* GNU-style hash table.  */
+ #define SHT_GNU_LIBLIST	  0x6ffffff7	/* Prelink library list */
+@@ -906,6 +907,7 @@ typedef struct
+    If any adjustment is made to the ELF object after it has been
+    built these entries will need to be adjusted.  */
+ #define DT_ADDRRNGLO	0x6ffffe00
++#define DT_GNU_XHASH	0x6ffffef4	/* GNU-style hash table with xlat.  */
+ #define DT_GNU_HASH	0x6ffffef5	/* GNU-style hash table.  */
+ #define DT_TLSDESC_PLT	0x6ffffef6
+ #define DT_TLSDESC_GOT	0x6ffffef7
+@@ -919,7 +921,7 @@ typedef struct
+ #define DT_SYMINFO	0x6ffffeff	/* Syminfo table.  */
+ #define DT_ADDRRNGHI	0x6ffffeff
+ #define DT_ADDRTAGIDX(tag)	(DT_ADDRRNGHI - (tag))	/* Reverse order! */
+-#define DT_ADDRNUM 11
++#define DT_ADDRNUM 12
+ 
+ /* The versioning entry types.  The next are defined as part of the
+    GNU extension.  */
+diff --git a/elf/get-dynamic-info.h b/elf/get-dynamic-info.h
+index 4b1ea7c407..0ba6b9a783 100644
+--- a/elf/get-dynamic-info.h
++++ b/elf/get-dynamic-info.h
+@@ -111,6 +111,7 @@ elf_get_dynamic_info (struct link_map *l, ElfW(Dyn) *temp)
+       ADJUST_DYN_INFO (DT_JMPREL);
+       ADJUST_DYN_INFO (VERSYMIDX (DT_VERSYM));
+       ADJUST_DYN_INFO (ADDRIDX (DT_GNU_HASH));
++      ADJUST_DYN_INFO (ADDRIDX (DT_GNU_XHASH));
+ # undef ADJUST_DYN_INFO
+       assert (cnt <= DL_RO_DYN_TEMP_CNT);
+     }
+diff --git a/sysdeps/mips/dl-addr.c b/sysdeps/mips/dl-addr.c
+index 60073dcee6..3f97c66876 100644
+--- a/sysdeps/mips/dl-addr.c
++++ b/sysdeps/mips/dl-addr.c
+@@ -42,34 +42,24 @@ determine_info (const ElfW(Addr) addr, struct link_map *match, Dl_info *info,
+   ElfW(Word) strtabsize = match->l_info[DT_STRSZ]->d_un.d_val;
+ 
+   const ElfW(Sym) *matchsym = NULL;
+-  if (match->l_info[DT_ADDRTAGIDX (DT_GNU_HASH) + DT_NUM + DT_THISPROCNUM
+-		    + DT_VERSIONTAGNUM + DT_EXTRANUM + DT_VALNUM] != NULL)
++  if (match->l_info[ADDRIDX (DT_GNU_XHASH)] != NULL)
+     {
+-      /* We look at all symbol table entries referenced by the hash
+-	 table.  */
+-      for (Elf_Symndx bucket = 0; bucket < match->l_nbuckets; ++bucket)
++      const Elf32_Word * const xhash32
++	= (void *) D_PTR (match, l_info[ADDRIDX (DT_GNU_XHASH)]);
++      const Elf32_Word symbias = xhash32[1];
++      const Elf32_Word dynsymcount = match->l_info[DT_MIPS_SYMTABNO
++					- DT_LOPROC + DT_NUM]->d_un.d_val;
++      for (Elf32_Word symndx = symbias; symndx < dynsymcount; ++symndx)
+ 	{
+-	  Elf32_Word symndx = match->l_gnu_buckets[bucket];
+-	  if (symndx != 0)
+-	    {
+-	      const Elf32_Word *hasharr = &match->l_gnu_chain_zero[symndx];
+-
+-	      do
+-		{
+-		  /* The hash table never references local symbols so
+-		     we can omit that test here.  */
+-		  if ((symtab[symndx].st_shndx != SHN_UNDEF
+-		       || symtab[symndx].st_value != 0)
+-		      && ELFW(ST_TYPE) (symtab[symndx].st_info) != STT_TLS
+-		      && DL_ADDR_SYM_MATCH (match, &symtab[symndx],
+-					    matchsym, addr)
+-		      && symtab[symndx].st_name < strtabsize)
+-		    matchsym = (ElfW(Sym) *) &symtab[symndx];
+-
+-		  ++symndx;
+-		}
+-	      while ((*hasharr++ & 1u) == 0);
+-	    }
++	  /* The hash table never references local symbols so
++	     we can omit that test here.  */
++	  if ((symtab[symndx].st_shndx != SHN_UNDEF
++	       || symtab[symndx].st_value != 0)
++	      && ELFW(ST_TYPE) (symtab[symndx].st_info) != STT_TLS
++	      && DL_ADDR_SYM_MATCH (match, &symtab[symndx],
++				    matchsym, addr)
++	      && symtab[symndx].st_name < strtabsize)
++	    matchsym = (ElfW(Sym) *) &symtab[symndx];
+ 	}
+     }
+   else
+diff --git a/sysdeps/mips/dl-lookup.c b/sysdeps/mips/dl-lookup.c
+index 41dced0e19..4bc632a080 100644
+--- a/sysdeps/mips/dl-lookup.c
++++ b/sysdeps/mips/dl-lookup.c
+@@ -402,7 +402,9 @@ do_lookup_x (const char *undef_name, uint_fast32_t new_hash,
+ 		  do
+ 		    if (((*hasharr ^ new_hash) >> 1) == 0)
+ 		      {
+-			symidx = hasharr - map->l_gnu_chain_zero;
++			symidx =
++			  map->l_mach.gnu_xlat_zero[hasharr -
++						    map->l_gnu_chain_zero];
+ 			sym = check_match (undef_name, ref, version, flags,
+ 					   type_class, &symtab[symidx], symidx,
+ 					   strtab, map, &versioned_sym,
+@@ -936,14 +938,10 @@ _dl_setup_hash (struct link_map *map)
+ {
+   Elf_Symndx *hash;
+ 
+-  if (__glibc_likely (map->l_info[DT_ADDRTAGIDX (DT_GNU_HASH) + DT_NUM
+-				    + DT_THISPROCNUM + DT_VERSIONTAGNUM
+-				    + DT_EXTRANUM + DT_VALNUM] != NULL))
++  if (__glibc_likely (map->l_info[ADDRIDX (DT_GNU_XHASH)] != NULL))
+     {
+       Elf32_Word *hash32
+-	= (void *) D_PTR (map, l_info[DT_ADDRTAGIDX (DT_GNU_HASH) + DT_NUM
+-				      + DT_THISPROCNUM + DT_VERSIONTAGNUM
+-				      + DT_EXTRANUM + DT_VALNUM]);
++	= (void *) D_PTR (map, l_info[ADDRIDX (DT_GNU_XHASH)]);
+       map->l_nbuckets = *hash32++;
+       Elf32_Word symbias = *hash32++;
+       Elf32_Word bitmask_nwords = *hash32++;
+@@ -958,6 +956,8 @@ _dl_setup_hash (struct link_map *map)
+       map->l_gnu_buckets = hash32;
+       hash32 += map->l_nbuckets;
+       map->l_gnu_chain_zero = hash32 - symbias;
++      hash32 += map->l_info[DT_MIPS (SYMTABNO)]->d_un.d_val - symbias;
++      map->l_mach.gnu_xlat_zero = hash32 - symbias;
+       return;
+     }
+ 
+diff --git a/sysdeps/mips/linkmap.h b/sysdeps/mips/linkmap.h
+index 1fb9678a6d..6ae0558f25 100644
+--- a/sysdeps/mips/linkmap.h
++++ b/sysdeps/mips/linkmap.h
+@@ -3,4 +3,5 @@ struct link_map_machine
+     ElfW(Addr) plt; /* Address of .plt */
+     ElfW(Word) fpabi; /* FP ABI of the object */
+     unsigned int odd_spreg; /* Does the object require odd_spreg support? */
++    const ElfW(Word) *gnu_xlat_zero; /* .gnu.xhash */
+   };
+-- 
+2.16.1
+
