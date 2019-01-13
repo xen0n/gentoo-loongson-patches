@@ -1,0 +1,86 @@
+From 280dd7ef9f1f9de56b2fd0dc44dd4aeaa79ddc2c Mon Sep 17 00:00:00 2001
+From: Jiaxun Yang <jiaxun.yang@flygoat.com>
+Date: Sun, 14 Oct 2018 19:23:49 +0800
+Subject: [PATCH 15/15] Add missing 128-bit mem access instructions
+
+Patch from Chenghua Xu <xuchenghua@loongson.cn>
+This sould solve: https://github.com/loongson-community/gcc/issues/40
+
+Signed-off-by: Jiaxun Yang <jiaxun.yang@flygoat.com>
+---
+ gcc/config/mips/loongson-ext.md | 50 +++++++++++++++++++++++++++++++++++++++++
+ gcc/config/mips/mips.md         |  1 +
+ 2 files changed, 51 insertions(+)
+ create mode 100644 gcc/config/mips/loongson-ext.md
+
+diff --git a/gcc/config/mips/loongson-ext.md b/gcc/config/mips/loongson-ext.md
+new file mode 100644
+index 00000000000..47f0d2218aa
+--- /dev/null
++++ b/gcc/config/mips/loongson-ext.md
+@@ -0,0 +1,50 @@
++;; FOR G3A 128-bit mem access instructions
++;; gssq and gslq define_insn pattern
++(define_insn "movsqdi_internal"
++  [(parallel [(set (match_operand:DI 0 "stack_operand" "")
++                   (match_operand:DI 1 "register_operand" ""))
++              (set (match_operand:DI 2 "stack_operand" "")
++                   (match_operand:DI 3 "register_operand" ""))])]
++  "mips_gs464_128_store_p(operands)"
++  {
++    return "gssq\t%1,%3,%2";
++  }
++  [(set_attr "length" "8")
++   (set_attr "can_delay" "no")])
++
++(define_insn "movsqdf_internal"
++  [(parallel [(set (match_operand:DF 0 "stack_operand" "")
++                   (match_operand:DF 1 "register_operand" ""))
++              (set (match_operand:DF 2 "stack_operand" "")
++                   (match_operand:DF 3 "register_operand" ""))])]
++  "mips_gs464_128_store_p(operands)"
++  {
++    return "gssqc1\t%1,%3,%2";
++  }
++  [(set_attr "length" "8")
++   (set_attr "can_delay" "no")])
++
++(define_insn "movlqdi_internal"
++  [(parallel [(set (match_operand:DI 0 "register_operand" "")
++                   (match_operand:DI 1 "stack_operand" ""))
++              (set (match_operand:DI 2 "register_operand" "")
++                   (match_operand:DI 3 "stack_operand" ""))])]
++  "mips_gs464_128_load_p(operands)"
++  {
++    return "gslq\t%0,%2,%3";
++  }
++  [(set_attr "length" "8")
++   (set_attr "can_delay" "no")])
++
++(define_insn "movlqdf_internal"
++  [(parallel [(set (match_operand:DF 0 "register_operand" "")
++                   (match_operand:DF 1 "stack_operand" ""))
++              (set (match_operand:DF 2 "register_operand" "")
++                   (match_operand:DF 3 "stack_operand" ""))])]
++  "mips_gs464_128_load_p(operands)"
++  {
++    return "gslqc1\t%0,%2,%3";
++  }
++  [(set_attr "length" "8")
++   (set_attr "can_delay" "no")])
++
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index c5e50a4e431..c7db4255af0 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -1183,6 +1183,7 @@
+ (include "7000.md")
+ (include "9000.md")
+ (include "10000.md")
++(include "loongson-ext.md")
+ (include "loongson2ef.md")
+ (include "gs464.md")
+ (include "gs464e.md")
+-- 
+2.16.1
+

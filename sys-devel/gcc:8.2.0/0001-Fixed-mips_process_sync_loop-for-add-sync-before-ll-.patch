@@ -1,0 +1,32 @@
+From e4e005e6b5ae9ee54270faf95751aaacaabe5b6a Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Tue, 20 Oct 2015 11:50:36 +0800
+Subject: [PATCH 01/15] Fixed mips_process_sync_loop for add sync before ll sc
+ jump label.
+
+    mips/mips.c:  mips_process_sync_loop(): Added sync.
+
+    The patch in src rpm was patch20.
+---
+ gcc/config/mips/mips.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/gcc/config/mips/mips.c b/gcc/config/mips/mips.c
+index aabd4b1580f..172134af347 100644
+--- a/gcc/config/mips/mips.c
++++ b/gcc/config/mips/mips.c
+@@ -14232,7 +14232,10 @@ mips_process_sync_loop (rtx_insn *insn, rtx *operands)
+ 
+   /* Output the exit label, if needed.  */
+   if (required_oldval)
+-    mips_multi_add_label ("2:");
++    {
++      mips_multi_add_label ("2:");
++      mips_multi_add_insn ("sync", NULL);
++    }
+ 
+ #undef READ_OPERAND
+ }
+-- 
+2.16.1
+

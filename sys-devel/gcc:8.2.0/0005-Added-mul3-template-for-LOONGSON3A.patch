@@ -1,0 +1,79 @@
+From 2855ce46e4eeec7188f39abcc97dafb17b733a2c Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Wed, 9 Dec 2015 13:06:37 +0800
+Subject: [PATCH 05/15] Added mul3 template for LOONGSON3A.
+
+    Adding mul3 template for LOONGSON3A.
+    mips/
+    mips.md: Added loongson3a to mult template.
+---
+ gcc/config/mips/loongson.md | 20 ++++++++++++++++++++
+ gcc/config/mips/mips.md     | 10 ++++++----
+ 2 files changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/gcc/config/mips/loongson.md b/gcc/config/mips/loongson.md
+index 5eff7993f5c..88f1487849f 100644
+--- a/gcc/config/mips/loongson.md
++++ b/gcc/config/mips/loongson.md
+@@ -889,6 +889,26 @@
+   [(set_attr "length" "8")
+    (set_attr "can_delay" "no")])
+ 
++;;for insn_and_split template sign extend
++(define_insn "gsdmul3di"
++  [(set (match_operand:DI 0 "register_operand" "=d")
++        (mult:DI (sign_extend:DI (match_operand:SI 1 "register_operand" "d"))
++                  (sign_extend: DI (match_operand:SI 2 "register_operand" "d"))))]
++  "TARGET_LOONGSON_3A && TARGET_64BIT"
++  "gsdmult\t%0,%1,%2"
++  [(set_attr "type" "imul3nc")
++   (set_attr "mode" "SI")])
++
++;;for insn_and_split template zero extend
++(define_insn "ugsdmul3di"
++  [(set (match_operand:DI 0 "register_operand" "=d")
++        (mult:DI (zero_extend:DI (match_operand:SI 1 "register_operand" "d"))
++                  (zero_extend: DI (match_operand:SI 2 "register_operand" "d"))))]
++  "TARGET_LOONGSON_3A && TARGET_64BIT"
++  "gsdmultu\t%0,%1,%2"
++  [(set_attr "type" "imul3nc")
++   (set_attr "mode" "SI")])
++
+ (define_insn "vec_loongson_extract_lo_<mode>"
+   [(set (match_operand:<V_inner> 0 "register_operand" "=r")
+         (vec_select:<V_inner>
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index 061e57db533..30e53b4da53 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -1592,7 +1592,8 @@
+ (define_expand "mul<mode>3"
+   [(set (match_operand:GPR 0 "register_operand")
+ 	(mult:GPR (match_operand:GPR 1 "register_operand")
+-		  (match_operand:GPR 2 "register_operand")))]
++		  (match_operand:GPR 2 "register_operand")))
++	          (clobber (match_scratch:GPR 3))]
+   "ISA_HAS_<D>MULT || ISA_HAS_R6<D>MUL"
+ {
+   rtx lo;
+@@ -1619,13 +1620,14 @@
+ (define_insn "mul<mode>3_mul3_nohilo"
+   [(set (match_operand:GPR 0 "register_operand" "=d")
+         (mult:GPR (match_operand:GPR 1 "register_operand" "d")
+-                  (match_operand:GPR 2 "register_operand" "d")))]
++                  (match_operand:GPR 2 "register_operand" "d")))
++	          (clobber (match_scratch:GPR 3  "=l"))]
+   "TARGET_LOONGSON_2EF || TARGET_LOONGSON_3A || ISA_HAS_R6<D>MUL"
+ {
+   if (TARGET_LOONGSON_2EF)
+-    return "<d>multu.g\t%0,%1,%2";
++    return "<d>mult.g\t%0,%1,%2";
+   else if (TARGET_LOONGSON_3A)
+-    return "gs<d>multu\t%0,%1,%2";
++    return "gs<d>mult\t%0,%1,%2";
+   else
+     return "<d>mul\t%0,%1,%2";
+ }
+-- 
+2.16.1
+

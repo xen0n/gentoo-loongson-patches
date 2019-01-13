@@ -1,0 +1,35 @@
+From c84b6a2b9040e42cebc6f0eebc169a53daf76a14 Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Wed, 9 Dec 2015 13:14:44 +0800
+Subject: [PATCH 06/15] Add RTL Template of gs<d>mod<u> in loongson.md file.
+
+    Add gsmod and delete the gsmod template mod check zero.
+    The gsmod template use function mips_output_division
+    for generate asm, the mips_output_division has divide
+    check zero, it's ok when the mod operands is zero.
+
+    mips/
+    loongson.md: Added gsmod for loognson3a.
+---
+ gcc/config/mips/mips.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index 30e53b4da53..cfe48a38ffc 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -3035,9 +3035,9 @@
+   "TARGET_LOONGSON_2EF || TARGET_LOONGSON_3A || ISA_HAS_R6<D>DIV"
+   {
+     if (TARGET_LOONGSON_2EF)
+-      return mips_output_division ("<d>mod<u>.g\t%0,%1,%2", operands);
++      return "<d>mod<u>.g\t%0,%1,%2";
+     else if (TARGET_LOONGSON_3A)
+-      return mips_output_division ("gs<d>mod<u>\t%0,%1,%2", operands);
++      return "gs<d>mod<u>\t%0,%1,%2";
+     else
+       return mips_output_division ("<d>mod<u>\t%0,%1,%2", operands);
+   }
+-- 
+2.16.1
+

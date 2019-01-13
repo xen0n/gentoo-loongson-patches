@@ -1,0 +1,56 @@
+From 82b0889dfc19a225b21a2b3836fc30d810b04d4b Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Wed, 25 Oct 2017 15:48:09 +0800
+Subject: [PATCH 11/15] set loads insn attr length to 8.
+
+    *gcc/config/mips/mips.md: set loads length to 8.
+---
+ gcc/config/mips/mips.md | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index 08307b42dd0..e9428ab6d6f 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -4673,7 +4673,11 @@
+    (set (attr "mode")
+    	(if_then_else (eq_attr "move_type" "imul")
+ 		      (const_string "SI")
+-		      (const_string "DI")))])
++		      (const_string "DI")))
++   (set (attr "length")
++   	(if_then_else (eq_attr "move_type" "load,fpload,mtc,mfc")
++		      (const_int 8)
++		      (const_int 4)))])
+ 
+ (define_insn "*movdi_32bit_mips16"
+   [(set (match_operand:DI 0 "nonimmediate_operand" "=d,y,d,d,d,d,m,*d")
+@@ -4693,7 +4697,11 @@
+        || reg_or_0_operand (operands[1], DImode))"
+   { return mips_output_move (operands[0], operands[1]); }
+   [(set_attr "move_type" "move,const,const,load,store,mtc,fpload,mfc,fpstore,mtlo,mflo,mtc,fpload,mfc,fpstore")
+-   (set_attr "mode" "DI")])
++   (set_attr "mode" "DI")
++   (set (attr "length")
++   	(if_then_else (eq_attr "move_type" "load,fpload,mtc,mfc")
++		      (const_int 8)
++		      (const_int 4)))])
+ 
+ (define_insn "*movdi_64bit_mips16"
+   [(set (match_operand:DI 0 "nonimmediate_operand" "=d,y,d,d,d,d,d,d,m,*d")
+@@ -4703,7 +4711,11 @@
+        || register_operand (operands[1], DImode))"
+   { return mips_output_move (operands[0], operands[1]); }
+   [(set_attr "move_type" "move,move,move,const,constN,const,loadpool,load,store,mflo")
+-   (set_attr "mode" "DI")])
++   (set_attr "mode" "DI")
++   (set (attr "length")
++   	(if_then_else (eq_attr "move_type" "load,fpload,mtc,mfc")
++		      (const_int 8)
++		      (const_int 4)))])
+ 
+ ;; On the mips16, we can split ld $r,N($r) into an add and a load,
+ ;; when the original load is a 4 byte instruction but the add and the
+-- 
+2.16.1
+

@@ -1,0 +1,37 @@
+From e782053a4680566f0893c2a9a787b0f219f673b2 Mon Sep 17 00:00:00 2001
+From: xuchenghua <xuchenghua@loongson.cn>
+Date: Fri, 3 Nov 2017 16:12:42 +0800
+Subject: [PATCH 12/15] set load_got and load_call insn attr length to 8.
+
+    *gcc/config/mips/mips.md: set load_call/got length to 8.
+---
+ gcc/config/mips/mips.md | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/mips/mips.md b/gcc/config/mips/mips.md
+index e9428ab6d6f..5c6278a375e 100644
+--- a/gcc/config/mips/mips.md
++++ b/gcc/config/mips/mips.md
+@@ -4576,7 +4576,8 @@
+   ""
+   "<load>\t%0,%R2(%1)"
+   [(set_attr "got" "load")
+-   (set_attr "mode" "<MODE>")])
++   (set_attr "mode" "<MODE>")
++   (set_attr "length" "8")])
+ 
+ ;; Instructions for adding the low 16 bits of an address to a register.
+ ;; Operand 2 is the address: mips_print_operand works out which relocation
+@@ -6880,7 +6881,8 @@
+   "TARGET_USE_GOT"
+   "<load>\t%0,%R2(%1)"
+   [(set_attr "got" "load")
+-   (set_attr "mode" "<MODE>")])
++   (set_attr "mode" "<MODE>")
++   (set_attr "length" "8")])
+ 
+ (define_insn "set_got_version"
+   [(set (reg:SI GOT_VERSION_REGNUM)
+-- 
+2.16.1
+
